@@ -186,12 +186,12 @@ var rekapiActor = function (context, _, Tweenable) {
       ,'_keyframeProperties': {}
       ,'id': getUniqueActorId()
       ,'setup': opt_config.setup || noop
-      ,'render': opt_config.render || noop
+      ,'update': opt_config.update || noop
       ,'teardown': opt_config.teardown || noop
     });
 
     if (opt_config.context) {
-      this.context(opt_context);
+      this.context(opt_config.context);
     }
 
     return this;
@@ -426,6 +426,30 @@ var rekapiActor = function (context, _, Tweenable) {
   };
 
 
+  /*
+   * Determines if an actor has a keyframe set at a given millisecond.
+   * Can optionally look for an existing keyframe on a single property track.
+   *
+   * @param {number} when Millisecond
+   * @param {string} opt_trackName Optional name of a property track
+   * @return {boolean}
+   */
+  Actor.prototype.hasKeyframeAt = function(when, opt_trackName) {
+    var tracks = this._propertyTracks;
+
+    if (opt_trackName) {
+      if (!_.has(tracks, opt_trackName)) {
+        return false;
+      }
+      tracks = _.pick(tracks, opt_trackName);
+    }
+
+    return _.find(tracks, function (propertyTrack, trackName) {
+      return findPropertyAtMillisecondInTrack(this, trackName, when) !== undefined;
+    }, this) !== undefined;
+  };
+
+
   /**
    * @param {number} when
    * @param {Object} stateModification
@@ -447,7 +471,6 @@ var rekapiActor = function (context, _, Tweenable) {
         });
       }
     }, this);
-
 
     return this;
   };
@@ -501,19 +524,10 @@ var rekapiActor = function (context, _, Tweenable) {
 
 
   /**
-   * @param {number} layer
-   * @return {Kapi.Actor|undefined}
-   */
-  Actor.prototype.moveToLayer = function (layer) {
-    return this.kapi.moveActorToLayer(this, layer);
-  };
-
-
-  /**
    * @param {number} millisecond
    * @return {Kapi.Actor}
    */
-  Actor.prototype.calculatePosition = function (millisecond) {
+  Actor.prototype.updateState = function (millisecond) {
     var startMs = this.getStart();
     var endMs = this.getEnd();
 

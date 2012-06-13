@@ -13,8 +13,7 @@
       rekapi: "../dist/rekapi"
     }
   });
-  require(['rekapi', 'underscore'], function(Kapi, _) {
-
+  require(['rekapi', 'underscore'], function(Kapi) {
 
     var canvas = document.getElementsByTagName('canvas')[0]
         ,kapi = new Kapi({
@@ -60,7 +59,7 @@
 
     function getActor (basePercentage, color, previousPiece) {
       var actor = new Kapi.CanvasActor({
-        'render': function (canvas_context, state) {
+        'draw': function (canvas_context, state) {
           var percent = basePercentage
               ,previousSum = getStartRad(this)
               ,x ,y

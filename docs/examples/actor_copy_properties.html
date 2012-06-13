@@ -18,7 +18,7 @@
       });
 
       var actor = new Kapi.CanvasActor({
-        'render': function (canvas_context, state) {
+        'draw': function (canvas_context, state) {
           canvas_context.beginPath();
             canvas_context.arc(
               state.x || 0,
@@ -44,7 +44,7 @@
       // properties as the first keyframe.
       actor.copyProperties(2000, 0);
 
-      kapi.play();
+      kapi.play(1);
     </script>
   </body>
 </html>

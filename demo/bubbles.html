@@ -13,11 +13,11 @@
       rekapi: "../dist/rekapi"
     }
   });
-  require(['rekapi', 'shifty', 'underscore'], function(Kapi, Tweenable, _) {
+  require(['rekapi', 'shifty', 'underscore'], function(Kapi, Tweenable) {
 
     function makeBubble () {
       return new Kapi.CanvasActor({
-        'render': function (canvas_context, state) {
+        'draw': function (canvas_context, state) {
           canvas_context.beginPath();
           canvas_context.arc(
             state.x || 0,
@@ -45,7 +45,6 @@
           grad.addColorStop(1, bgColor);
           canvas_context.fillStyle = grad;
           canvas_context.fill();
-
         }
       });
     }
@@ -172,8 +171,7 @@
     });
 
     generateSequence();
-
-    });
+  });
   </script>
 </body>
 </html>
