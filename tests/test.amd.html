@@ -97,9 +97,14 @@
         ok(window.Kapi === undefined);
         ok(window.Tweenable === undefined);
 
+        // TODO: Since Rekapi now uses Lo-Dash by default, which supports
+        // AMD like Rekapi and Shifty, there needs to be a more consistent test
+        // to detect if the Underscore-like dependency was handled correctly.
+        // The old Underscore-specific assertion is left in, commented.
+
         // The loaded version of Underscore does not support AMD, so it will
         // be global.
-        ok(window._ !== undefined);
+        //ok(window._ !== undefined);
         start();
       });
     });

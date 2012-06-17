@@ -153,4 +153,4 @@ var rekapiCode = _fs.readFileSync('./dist/rekapi.min.js', 'utf-8');
 var bin = [underscoreCode, shiftyCode, rekapiCode].join(';');
 
 _fs.writeFileSync(_distBundleName, getLicense() + bin );
-echoFileSize(_distBundleName, '\n   Joy!  The bundle file (Underscore + Shifty + Rekapi) was created.');
+echoFileSize(_distBundleName, '\n   Joy!  The bundle file (Underscore/Lo-Dash + Shifty + Rekapi) was created.');
