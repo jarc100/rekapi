@@ -44,7 +44,7 @@ __[Example](examples/actor.html)__
 Kapi.Actor.prototype.context (opt_context)
 ````
 
-Get and optionally set the `Actor`'s rendering context.
+Get and optionally set the `Actor`'s context.
 
 __[Example](examples/actor_context.html)__
 
@@ -222,6 +222,8 @@ actor.modifyKeyframe(1000, {
 });
 ````
 
+__[Example](examples/actor_modify_keyframe.html)__
+
 
 ### getKeyframeProperty
 
@@ -236,6 +238,8 @@ Kapi.Actor.prototype.getKeyframeProperty (property, index)
 ````
 
 Gets the `KeyframeProperty` from an `Actor`'s `KeyframeProperty` track.
+
+__[Example](examples/actor_get_keyframe_property.html)__
 
 
 ### modifyKeyframeProperty
@@ -254,6 +258,8 @@ Modify a specified `KeyframeProperty` stored on an `Actor`.  Essentially, this
 calls `modifyWith` on the targeted `KeyframeProperty` (passing along
 `newProperties`) and then performs some cleanup.
 
+__[Example](examples/actor_modify_keyframe_property.html)__
+
 
 ### getTrackNames
 
@@ -267,6 +273,8 @@ Kapi.Actor.prototype.getTrackNames ()
 Get a list of all the track names for an `Actor`.  Each element in this Array
 is a string.
 
+__[Example](examples/actor_get_track_names.html)__
+
 
 ### getTrackLength
 
@@ -278,7 +286,10 @@ is a string.
 Kapi.Actor.prototype.getTrackLength (trackName)
 ````
 
-Get the property track length for an `Actor`.
+Get the property track length for an `Actor` (how many `KeyframeProperty`s are
+in a given property track).
+
+__[Example](examples/actor_get_track_length.html)__
 
 
 ### getStart
@@ -294,6 +305,8 @@ Kapi.Actor.prototype.getStart ()
 Get the millisecond of the first state of an `Actor` (when it first starts
 animating).
 
+__[Example](examples/actor_get_start.html)__
+
 
 ### getEnd
 
@@ -308,6 +321,8 @@ Kapi.Actor.prototype.getEnd ()
 Get the millisecond of the last state of an `Actor` (when it is done
 animating).
 
+__[Example](examples/actor_get_end.html)__
+
 
 ### getLength
 
@@ -321,6 +336,8 @@ Kapi.Actor.prototype.getLength ()
 
 Get the length of time in milliseconds that an `Actor` animates for.
 
+__[Example](examples/actor_get_length.html)__
+
 
 ### updateState
 
@@ -333,6 +350,8 @@ Kapi.Actor.prototype.updateState (millisecond)
 ````
 
 Calculate and set the `Actor`'s position at `millisecond` in the animation.
+
+__[Example](examples/actor_update_state.html)__
 
 
 ### data
@@ -349,6 +368,8 @@ Retrieve and optionally bind arbitrary data to the `Actor`.  If `opt_newData`
 is specified, it will overwrite the previous `opt_newData` Object that was
 bound with this method.
 
+__[Example](examples/actor_data.html)__
+
 
 ### exportTimeline
 
@@ -361,3 +382,5 @@ Kapi.Actor.prototype.exportTimeline ()
 
 Export a reference-less dump of this Actor's timeline property tracks and
 KeyframeProperties.
+
+__[Example](examples/actor_export_timeline.html)__

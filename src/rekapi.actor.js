@@ -3,13 +3,7 @@ var rekapiActor = function (context, _, Tweenable) {
   'use strict';
 
   var DEFAULT_EASING = 'linear';
-  var actorCount = 0;
   var Kapi = context.Kapi;
-
-
-  function getUniqueActorId () {
-    return actorCount++;
-  }
 
 
   /**
@@ -176,7 +170,7 @@ var rekapiActor = function (context, _, Tweenable) {
     opt_config = opt_config || {};
 
     // Steal the `Tweenable` constructor.
-    this.constructor.call(this);
+    Tweenable.call(this);
 
     _.extend(this, {
       '_data': {}
@@ -184,7 +178,7 @@ var rekapiActor = function (context, _, Tweenable) {
       ,'_timelinePropertyCaches': {}
       ,'_timelinePropertyCacheIndex': []
       ,'_keyframeProperties': {}
-      ,'id': getUniqueActorId()
+      ,'id': _.uniqueId()
       ,'setup': opt_config.setup || noop
       ,'update': opt_config.update || noop
       ,'teardown': opt_config.teardown || noop
@@ -263,7 +257,7 @@ var rekapiActor = function (context, _, Tweenable) {
     }, this);
 
     if (this.kapi) {
-      this.kapi._recalculateAnimationLength();
+      recalculateAnimationLength(this.kapi);
     }
 
     invalidatePropertyCache(this);
@@ -300,6 +294,7 @@ var rekapiActor = function (context, _, Tweenable) {
 
     sortPropertyTracks(this);
     invalidatePropertyCache(this);
+    recalculateAnimationLength(this.kapi);
     return this;
   };
 
@@ -501,7 +496,7 @@ var rekapiActor = function (context, _, Tweenable) {
     }, this);
 
     if (this.kapi) {
-      this.kapi._recalculateAnimationLength();
+      recalculateAnimationLength(this.kapi);
     }
 
     invalidatePropertyCache(this);

@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, plusplus: true, undef: true, vars: true, white: true */
 /**
- * Rekapi - Rewritten Kapi. v0.9.0
+ * Rekapi - Rewritten Kapi. v0.9.9 (Fri, 22 Jun 2012 02:21:16 GMT)
  * https://github.com/jeremyckahn/rekapi
  *
  * By Jeremy Kahn (jeremyckahn@gmail.com), with significant contributions from
@@ -11,8 +11,7 @@
  *   Shifty.js (https://github.com/jeremyckahn/shifty).
  * MIT Lincense.  This code free to use, modify, distribute and enjoy.
  */
-;(function(global) {
-
+;(function (global) {
 // REKAPI-GLOBAL METHODS
 // These are global in development, but get wrapped in a closure at build-time.
 
@@ -28,6 +27,20 @@ function fireEvent (kapi, eventName, _, opt_data) {
     handler(kapi, opt_data);
   });
 }
+
+
+/**
+ * @param {Kapi} kapi
+ */
+function recalculateAnimationLength (kapi) {
+  var actorLengths = [];
+
+  _.each(kapi._actors, function (actor) {
+    actorLengths.push(actor.getEnd());
+  });
+
+  kapi._animationLength = Math.max.apply(Math, actorLengths);
+};
 
 
 /**
@@ -241,7 +254,7 @@ var rekapiCore = function (context, _, Tweenable) {
    */
   var Kapi = context.Kapi || function Kapi (opt_config) {
     this.config = opt_config || {};
-    this.context = this.config.context;
+    this.context = this.config.context || {};
     this._actors = {};
     this._playState = playState.STOPPED;
 
@@ -290,28 +303,10 @@ var rekapiCore = function (context, _, Tweenable) {
 
 
   /**
-   * @type {{function}} Contains the context init function to be called in the
-   * Kapi contstructor.
+   * @type {Object.<function>} Contains the context init function to be called
+   * in the Kapi contstructor.
    */
   Kapi.prototype._contextInitHook = {};
-
-
-  /**
-   * @private
-   *
-   * @return {Kapi}
-   */
-  Kapi.prototype._recalculateAnimationLength = function () {
-    var actorLengths = [];
-
-    _.each(this._actors, function (actor) {
-      actorLengths.push(actor.getEnd());
-    });
-
-    this._animationLength = Math.max.apply(Math, actorLengths);
-
-    return this;
-  };
 
 
   /**
@@ -328,7 +323,7 @@ var rekapiCore = function (context, _, Tweenable) {
       actor.kapi = this;
       actor.fps = this.framerate();
       this._actors[actor.id] = actor;
-      this._recalculateAnimationLength();
+      recalculateAnimationLength(this);
       actor.setup();
 
       fireEvent(this, 'addActor', _, actor);
@@ -371,7 +366,7 @@ var rekapiCore = function (context, _, Tweenable) {
     delete this._actors[actor.id];
     delete actor.kapi;
     actor.teardown();
-    this._recalculateAnimationLength();
+    recalculateAnimationLength(this);
 
     fireEvent(this, 'removeActor', _, actor);
 
@@ -599,12 +594,6 @@ var rekapiCore = function (context, _, Tweenable) {
 
   Kapi.util = {};
 
-  // TODO:  There are some duplicates in Kapi.util and Kapi._private, clean up
-  // the references in the tests.
-  _.extend(Kapi.util, {
-    'calculateLoopPosition': calculateLoopPosition
-    ,'calculateTimeSinceStart': calculateTimeSinceStart
-  });
 
   // Some hooks for testing.
   if (typeof KAPI_DEBUG !== 'undefined' && KAPI_DEBUG === true) {
@@ -627,13 +616,7 @@ var rekapiActor = function (context, _, Tweenable) {
   'use strict';
 
   var DEFAULT_EASING = 'linear';
-  var actorCount = 0;
   var Kapi = context.Kapi;
-
-
-  function getUniqueActorId () {
-    return actorCount++;
-  }
 
 
   /**
@@ -800,7 +783,7 @@ var rekapiActor = function (context, _, Tweenable) {
     opt_config = opt_config || {};
 
     // Steal the `Tweenable` constructor.
-    this.constructor.call(this);
+    Tweenable.call(this);
 
     _.extend(this, {
       '_data': {}
@@ -808,7 +791,7 @@ var rekapiActor = function (context, _, Tweenable) {
       ,'_timelinePropertyCaches': {}
       ,'_timelinePropertyCacheIndex': []
       ,'_keyframeProperties': {}
-      ,'id': getUniqueActorId()
+      ,'id': _.uniqueId()
       ,'setup': opt_config.setup || noop
       ,'update': opt_config.update || noop
       ,'teardown': opt_config.teardown || noop
@@ -887,7 +870,7 @@ var rekapiActor = function (context, _, Tweenable) {
     }, this);
 
     if (this.kapi) {
-      this.kapi._recalculateAnimationLength();
+      recalculateAnimationLength(this.kapi);
     }
 
     invalidatePropertyCache(this);
@@ -924,6 +907,7 @@ var rekapiActor = function (context, _, Tweenable) {
 
     sortPropertyTracks(this);
     invalidatePropertyCache(this);
+    recalculateAnimationLength(this.kapi);
     return this;
   };
 
@@ -1125,7 +1109,7 @@ var rekapiActor = function (context, _, Tweenable) {
     }, this);
 
     if (this.kapi) {
-      this.kapi._recalculateAnimationLength();
+      recalculateAnimationLength(this.kapi);
     }
 
     invalidatePropertyCache(this);
@@ -1306,7 +1290,7 @@ var rekapiCanvasContext = function (context, _) {
 
   'use strict';
 
-  var gk = context.Kapi;
+  var Kapi = context.Kapi;
 
   /**
    * Gets (and optionally sets) height or width on a canvas.
@@ -1369,7 +1353,7 @@ var rekapiCanvasContext = function (context, _) {
 
 
   function addActor (kapi, actor) {
-    if (actor instanceof gk.CanvasActor) {
+    if (actor instanceof Kapi.CanvasActor) {
       kapi._drawOrder.push(actor.id);
       kapi._canvasActors[actor.id] = actor;
     }
@@ -1377,18 +1361,14 @@ var rekapiCanvasContext = function (context, _) {
 
 
   function removeActor (kapi, actor) {
-    if (actor instanceof gk.CanvasActor) {
+    if (actor instanceof Kapi.CanvasActor) {
       kapi._drawOrder = _.without(kapi._drawOrder, actor.id);
       delete kapi._canvasActors[actor.id];
     }
   }
 
 
-  gk.prototype._contextInitHook.canvas = function () {
-    if (!(this.config.context && this.config.context.nodeName === 'CANVAS')) {
-      return;
-    }
-
+  Kapi.prototype._contextInitHook.canvas = function () {
     this._drawOrder = [];
     this._drawOrderSorter = null;
     this._canvasActors = {};
@@ -1418,7 +1398,7 @@ var rekapiCanvasContext = function (context, _) {
    * @param {number} opt_height
    * @return {number}
    */
-  gk.prototype.canvasHeight = function (opt_height) {
+  Kapi.prototype.canvasHeight = function (opt_height) {
     return canvasDimension(this.context, 'height', opt_height);
   };
 
@@ -1427,7 +1407,7 @@ var rekapiCanvasContext = function (context, _) {
    * @param {number} opt_width
    * @return {number}
    */
-  gk.prototype.canvasWidth = function (opt_width) {
+  Kapi.prototype.canvasWidth = function (opt_width) {
     return canvasDimension(this.context, 'width', opt_width);
   };
 
@@ -1435,9 +1415,11 @@ var rekapiCanvasContext = function (context, _) {
   /**
    * @return {Kapi}
    */
-  gk.prototype.canvasClear = function () {
-    this.canvasContext().clearRect(0, 0, this.canvasWidth(),
-        this.canvasHeight());
+  Kapi.prototype.canvasClear = function () {
+    if (this.context.getContext) {
+      this.canvasContext().clearRect(
+          0, 0, this.canvasWidth(), this.canvasHeight());
+    }
 
     return this;
   };
@@ -1446,7 +1428,7 @@ var rekapiCanvasContext = function (context, _) {
   /**
    * @return {CanvasRenderingContext2D}
    */
-  gk.prototype.canvasContext = function () {
+  Kapi.prototype.canvasContext = function () {
     return this.context.getContext('2d');
   };
 
@@ -1454,7 +1436,7 @@ var rekapiCanvasContext = function (context, _) {
   /**
    * @return {Kapi}
    */
-  gk.prototype.redraw = function () {
+  Kapi.prototype.redraw = function () {
     draw(this);
 
     return this;
@@ -1466,7 +1448,7 @@ var rekapiCanvasContext = function (context, _) {
    * @param {number} layer
    * @return {Kapi.Actor|undefined}
    */
-  gk.prototype.moveActorToLayer = function (actor, layer) {
+  Kapi.prototype.moveActorToLayer = function (actor, layer) {
     if (layer < this._drawOrder.length) {
       this._drawOrder = _.without(this._drawOrder, actor.id);
       this._drawOrder.splice(layer, 0, actor.id);
@@ -1482,7 +1464,7 @@ var rekapiCanvasContext = function (context, _) {
    * @param {function(Kapi.Actor, number)} sortFunction
    * @return {Kapi}
    */
-  gk.prototype.setOrderFunction = function (sortFunction) {
+  Kapi.prototype.setOrderFunction = function (sortFunction) {
     this._drawOrderSorter = sortFunction;
     return this;
   };
@@ -1491,7 +1473,7 @@ var rekapiCanvasContext = function (context, _) {
   /**
    * @return {Kapi}
    */
-  gk.prototype.unsetOrderFunction = function () {
+  Kapi.prototype.unsetOrderFunction = function () {
     this._drawOrderSorter = null;
     return this;
   };
@@ -1500,7 +1482,7 @@ var rekapiCanvasContext = function (context, _) {
   /**
    * @return {Object}
    */
-  gk.prototype.exportTimeline = function () {
+  Kapi.prototype.exportTimeline = function () {
     var exportData = {
       'duration': this._animationLength
       ,'actorOrder': this._drawOrder.slice(0)
@@ -1564,16 +1546,69 @@ var rekapiDOM = function (context, _) {
   'use strict';
 
   var Kapi = context.Kapi;
+  // TODO:  Change the name of this array to a clearer name, e.g. `vendorTransforms`
   var transforms = [
     'transform'
     ,'webkitTransform'
     ,'MozTransform'
     ,'oTransform'
     ,'msTransform'];
+  var transformFunctions = [
+    'translateX',
+    'translateY',
+    'scale',
+    'scaleX',
+    'scaleY',
+    'rotate',
+    'skewX',
+    'skewY'];
 
 
   function setStyle (forElement, styleName, styleValue) {
     forElement.style[styleName] = styleValue;
+  }
+
+
+  /**
+   * @param {string} name A transform function name
+   * @return {boolean}
+   */
+  function isTransformFunction (name) {
+    return _.contains(transformFunctions, name);
+  }
+
+
+  /**
+   * Builds a concatenated string of given transform property values in order.
+   *
+   * @param {Array.<string>} orderedFunctions Array of ordered transform function names
+   * @param {Object} transformProperties Transform properties to build together
+   * @return {string}
+   */
+  function buildTransformValue (orderedFunctions, transformProperties) {
+    var transformComponents = [];
+
+    _.each(orderedFunctions, function(functionName) {
+      if (transformProperties[functionName]) {
+        transformComponents.push(functionName + '(' +
+          transformProperties[functionName] + ')');
+      }
+    });
+
+    return transformComponents.join(' ');
+  }
+
+
+  /**
+   * Sets value for all vendor prefixed transform properties on a given context
+   *
+   * @param {Object} context The actor's DOM context
+   * @param {string} transformValue The transform style value
+   */
+  function setTransformStyles (context, transformValue) {
+    _.each(transforms, function(prefixedTransform) {
+      setStyle(context, prefixedTransform, transformValue);
+    });
   }
 
 
@@ -1591,6 +1626,8 @@ var rekapiDOM = function (context, _) {
     if (!this._context.className.match(className)) {
       this._context.className += ' ' + className;
     }
+
+    this._transformOrder = transformFunctions.slice(0);
 
     // Remove the instance's update method to allow the
     // ActorMethods.prototype.update method to be accessible.
@@ -1611,15 +1648,22 @@ var rekapiDOM = function (context, _) {
    * @param {Object} state
    */
   DOMActorMethods.prototype.update = function (context, state) {
+    var propertyNames = _.keys(state);
+    // TODO:  Optimize the following code so that propertyNames is not looped over twice.
+    var transformFunctionNames = _.filter(propertyNames, isTransformFunction);
+    var otherPropertyNames = _.reject(propertyNames, isTransformFunction);
+    var otherProperties = _.pick(state, otherPropertyNames);
 
-    _.each(state, function (styleValue, styleName) {
-      if (styleName === 'transform') {
-        _.each(transforms, function (transform) {
-          setStyle(context, transform, styleValue);
-        }, this);
-      } else {
-        setStyle(context, styleName, styleValue);
-      }
+    if (transformFunctionNames.length) {
+      var transformProperties = _.pick(state, transformFunctionNames);
+      var builtStyle = buildTransformValue(this._transformOrder, transformProperties);
+      setTransformStyles(context, builtStyle);
+    } else if (state.transform) {
+      setTransformStyles(context, state.transform);
+    }
+
+    _.each(otherProperties, function (styleValue, styleName) {
+      setStyle(context, styleName, styleValue);
     }, this);
   };
 
@@ -1636,6 +1680,25 @@ var rekapiDOM = function (context, _) {
    */
   DOMActorMethods.prototype.getCSSName = function () {
     return 'actor-' + this.id;
+  };
+
+
+  /**
+   * Overrides the default transform function order.
+   * 
+   * @param {Array} orderedFunctions The Array of transform function names
+   * @return {Kapi}
+   */
+  DOMActorMethods.prototype.setTransformOrder = function (orderedFunctions) {
+    var unknownFunctions = _.reject(orderedFunctions, isTransformFunction);
+
+    if (unknownFunctions.length) {
+      throw 'Unknown or unsupported transform functions: ' + unknownFunctions.join(', ');
+    }
+    // Ignore duplicate transform function names in the array
+    this._transformOrder = _.uniq(orderedFunctions);
+
+    return this;
   };
 
 };
@@ -1708,12 +1771,13 @@ var rekapiToCSS = function (context, _) {
   context.Kapi.Actor.prototype.toCSS = function (opts) {
     opts = opts || {};
     var actorCSS = [];
+    var animName = opts.name || this.getCSSName();
     var granularity = opts.granularity || DEFAULT_GRANULARITY;
-    var actorClass = generateCSSClass(this, opts.vendors);
+    var actorClass = generateCSSClass(this, opts.vendors, animName);
     actorCSS.push(actorClass);
     var keyframes = generateActorKeyframes(this, granularity);
     var boilerplatedKeyframes = applyVendorBoilerplates(
-        keyframes, this.getCSSName(), opts.vendors);
+        keyframes, animName, opts.vendors);
     actorCSS.push(boilerplatedKeyframes);
 
     return actorCSS.join('\n');
@@ -1828,19 +1892,20 @@ var rekapiToCSS = function (context, _) {
   /**
    * @param {Kapi.Actor} actor
    * @param {[string]} opt_vendors
+   * @param {string} animName
    */
-  function generateCSSClass (actor, opt_vendors) {
+  function generateCSSClass (actor, opt_vendors, animName) {
     opt_vendors = opt_vendors || ['w3'];
     var classAttrs = [];
     var vendorAttrs;
 
     _.each(opt_vendors, function (vendor) {
-      vendorAttrs = generateCSSVendorAttributes(actor, vendor);
+      vendorAttrs = generateCSSVendorAttributes(actor, vendor, animName);
       classAttrs.push(vendorAttrs);
     });
 
     var boilerplatedClass = printf(CLASS_BOILERPLATE
-        ,[actor.getCSSName(), classAttrs.join('\n')]);
+        ,[animName, classAttrs.join('\n')]);
 
     return boilerplatedClass;
   }
@@ -1849,8 +1914,9 @@ var rekapiToCSS = function (context, _) {
   /**
    * @param {Kapi.Actor} actor
    * @param {string} vendor
+   * @param {string} animName
    */
-  function generateCSSVendorAttributes (actor, vendor) {
+  function generateCSSVendorAttributes (actor, vendor, animName) {
     var generatedAttributes = [];
     var prefix = VENDOR_PREFIXES[vendor];
     var start = actor.getStart();
@@ -1861,7 +1927,7 @@ var rekapiToCSS = function (context, _) {
     generatedAttributes.push(duration);
 
     var animationName = printf('  %sanimation-name: %s;'
-        ,[prefix, actor.getCSSName() + '-keyframes']);
+        ,[prefix, animName + '-keyframes']);
     generatedAttributes.push(animationName);
 
     var delay = printf('  %sanimation-delay: %sms;', [prefix, start]);
