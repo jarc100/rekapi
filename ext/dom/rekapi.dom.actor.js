@@ -3,8 +3,7 @@ var rekapiDOM = function (context, _) {
   'use strict';
 
   var Kapi = context.Kapi;
-  // TODO:  Change the name of this array to a clearer name, e.g. `vendorTransforms`
-  var transforms = [
+  var vendorTransforms = [
     'transform'
     ,'webkitTransform'
     ,'MozTransform'
@@ -38,7 +37,8 @@ var rekapiDOM = function (context, _) {
   /**
    * Builds a concatenated string of given transform property values in order.
    *
-   * @param {Array.<string>} orderedFunctions Array of ordered transform function names
+   * @param {Array.<string>} orderedFunctions Array of ordered transform
+   *     function names
    * @param {Object} transformProperties Transform properties to build together
    * @return {string}
    */
@@ -63,7 +63,7 @@ var rekapiDOM = function (context, _) {
    * @param {string} transformValue The transform style value
    */
   function setTransformStyles (context, transformValue) {
-    _.each(transforms, function(prefixedTransform) {
+    _.each(vendorTransforms, function(prefixedTransform) {
       setStyle(context, prefixedTransform, transformValue);
     });
   }
@@ -106,14 +106,16 @@ var rekapiDOM = function (context, _) {
    */
   DOMActorMethods.prototype.update = function (context, state) {
     var propertyNames = _.keys(state);
-    // TODO:  Optimize the following code so that propertyNames is not looped over twice.
+    // TODO:  Optimize the following code so that propertyNames is not looped
+    // over twice.
     var transformFunctionNames = _.filter(propertyNames, isTransformFunction);
     var otherPropertyNames = _.reject(propertyNames, isTransformFunction);
     var otherProperties = _.pick(state, otherPropertyNames);
 
     if (transformFunctionNames.length) {
       var transformProperties = _.pick(state, transformFunctionNames);
-      var builtStyle = buildTransformValue(this._transformOrder, transformProperties);
+      var builtStyle = buildTransformValue(this._transformOrder,
+          transformProperties);
       setTransformStyles(context, builtStyle);
     } else if (state.transform) {
       setTransformStyles(context, state.transform);
@@ -142,7 +144,7 @@ var rekapiDOM = function (context, _) {
 
   /**
    * Overrides the default transform function order.
-   * 
+   *
    * @param {Array} orderedFunctions The Array of transform function names
    * @return {Kapi}
    */
@@ -150,7 +152,8 @@ var rekapiDOM = function (context, _) {
     var unknownFunctions = _.reject(orderedFunctions, isTransformFunction);
 
     if (unknownFunctions.length) {
-      throw 'Unknown or unsupported transform functions: ' + unknownFunctions.join(', ');
+      throw 'Unknown or unsupported transform functions: ' +
+        unknownFunctions.join(', ');
     }
     // Ignore duplicate transform function names in the array
     this._transformOrder = _.uniq(orderedFunctions);
