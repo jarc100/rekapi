@@ -316,6 +316,17 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
+   * @param {number} fromProp
+   * @param {number} toProp
+   * @param {number} increments
+   */
+  function generateActorKeyframeSegment (actor, fromProp, toProp, increments) {
+
+  };
+
+
+  /**
+   * @param {Kapi.Actor} actor
    * @return {string}
    */
   function serializeActorStep (actor) {
