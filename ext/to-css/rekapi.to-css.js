@@ -316,12 +316,28 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
-   * @param {number} fromProp
-   * @param {number} toProp
+   * @param {Kapi.KeyframeProperty} fromProp
+   * @param {number} fromPercent
    * @param {number} increments
+   * @return {Array.<string>}
    */
-  function generateActorKeyframeSegment (actor, fromProp, toProp, increments) {
+  function generateActorKeyframeSegment (
+      actor, fromProp, fromPercent, increments) {
 
+    var serializedFrames = [];
+    var nextProp = fromProp.nextProperty;
+    var delta = fromProp.millisecond - nextProp.millisecond;
+    var incrementSize = delta / increments;
+
+    var i, adjustedPercent, stepPrefix;
+    for (i = 0; i < increments; i++) {
+      adjustedPercent = fromPercent + (i * incrementSize);
+      actor.updateState( (adjustedPercent / 100) * actor.getLength() );
+      stepPrefix = adjustedPercent + '% ';
+      serializedFrames.push('  ' + stepPrefix + serializeActorStep(actor));
+    }
+
+    return serializedFrames;
   };
 
 
