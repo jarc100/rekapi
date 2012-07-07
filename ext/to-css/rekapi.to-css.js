@@ -332,7 +332,7 @@ var rekapiToCSS = function (context, _) {
     for (i = 0; i < increments; i++) {
       adjustedPercent = fromPercent + (i * incrementSize);
       actor.updateState( (adjustedPercent / 100) * actor.getLength() );
-      stepPrefix = adjustedPercent + '% ';
+      stepPrefix = +adjustedPercent.toFixed(2) + '% ';
       serializedFrames.push(
           '  ' + stepPrefix + serializeActorStep(actor, fromProp.name));
     }

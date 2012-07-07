@@ -289,7 +289,7 @@
     module('generateActorTrackSegment');
 
 
-    test('Can get @keyframes for a track segment',
+    test('Can get @keyframes for a three-step track segment',
         function () {
 
       var kapi = new Kapi();
@@ -298,7 +298,7 @@
       actor1
         .keyframe(0,    { 'x': 0   })
         .keyframe(1000, { 'x': 100 })
-        .keyframe(2000, { 'x': 200 })
+        .keyframe(2000, { 'x': 200 });
 
       var serializedSegment =
           Kapi._private.toCSS.generateActorTrackSegment(
@@ -311,6 +311,34 @@
           ,'  70% {x:140;}'
           ,'  80% {x:160;}'
           ,'  90% {x:180;}']
+          ,'Arbitrary keyframe step was serialized');
+    });
+
+
+    test('Can get @keyframes for a five-step track segment',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0   })
+        .keyframe(1000, { 'x': 100 })
+        .keyframe(2000, { 'x': 200 })
+        .keyframe(3000, { 'x': 400 })
+        .keyframe(4000, { 'x': 600 })
+
+      var serializedSegment =
+          Kapi._private.toCSS.generateActorTrackSegment(
+              actor1, actor1._propertyTracks['x'][1], 5);
+
+      deepEqual(
+          serializedSegment
+          ,['  20% {x:100;}'
+          ,'  24% {x:120;}'
+          ,'  28% {x:140;}'
+          ,'  32% {x:160;}'
+          ,'  36% {x:180;}']
           ,'Arbitrary keyframe step was serialized');
     });
 
