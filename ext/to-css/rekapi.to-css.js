@@ -317,17 +317,16 @@ var rekapiToCSS = function (context, _) {
   /**
    * @param {Kapi.Actor} actor
    * @param {Kapi.KeyframeProperty} fromProp
-   * @param {number} fromPercent
    * @param {number} increments
    * @return {Array.<string>}
    */
-  function generateActorTrackSegment (
-      actor, fromProp, fromPercent, increments) {
+  function generateActorTrackSegment (actor, fromProp, increments) {
 
     var serializedFrames = [];
     var nextProp = fromProp.nextProperty;
-    var delta = fromProp.millisecond - nextProp.millisecond;
-    var incrementSize = delta / increments;
+    var fromPercent = 100 / (actor.getLength() / fromProp.millisecond);
+    var delta = nextProp.millisecond - fromProp.millisecond;
+    var incrementSize = actor.getLength() / (delta / increments);
 
     var i, adjustedPercent, stepPrefix;
     for (i = 0; i < increments; i++) {
@@ -385,6 +384,7 @@ var rekapiToCSS = function (context, _) {
       ,'generateOptimizedKeyframes': generateOptimizedKeyframes
       ,'getOptimizedEasingFormula': getOptimizedEasingFormula
       ,'generateActorKeyframes': generateActorKeyframes
+      ,'generateActorTrackSegment': generateActorTrackSegment
       ,'serializeActorStep': serializeActorStep
     }
   }

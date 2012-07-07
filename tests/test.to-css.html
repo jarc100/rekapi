@@ -286,6 +286,35 @@
     });
 
 
+    module('generateActorTrackSegment');
+
+
+    test('Can get @keyframes for a track segment',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0   })
+        .keyframe(1000, { 'x': 100 })
+        .keyframe(2000, { 'x': 200 })
+
+      var serializedSegment =
+          Kapi._private.toCSS.generateActorTrackSegment(
+              actor1, actor1._propertyTracks['x'][1], 5);
+
+      deepEqual(
+          serializedSegment
+          ,['  50% {x:100;}'
+          ,'  60% {x:120;}'
+          ,'  70% {x:140;}'
+          ,'  80% {x:160;}'
+          ,'  90% {x:180;}']
+          ,'Arbitrary keyframe step was serialized');
+    });
+
+
     module('serializeActorStep');
 
 
