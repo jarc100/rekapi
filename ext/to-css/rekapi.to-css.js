@@ -321,7 +321,7 @@ var rekapiToCSS = function (context, _) {
    * @param {number} increments
    * @return {Array.<string>}
    */
-  function generateActorKeyframeSegment (
+  function generateActorTrackSegment (
       actor, fromProp, fromPercent, increments) {
 
     var serializedFrames = [];
@@ -334,7 +334,8 @@ var rekapiToCSS = function (context, _) {
       adjustedPercent = fromPercent + (i * incrementSize);
       actor.updateState( (adjustedPercent / 100) * actor.getLength() );
       stepPrefix = adjustedPercent + '% ';
-      serializedFrames.push('  ' + stepPrefix + serializeActorStep(actor));
+      serializedFrames.push(
+          '  ' + stepPrefix + serializeActorStep(actor, fromProp.name));
     }
 
     return serializedFrames;
@@ -343,12 +344,22 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
+   * @param {string} opt_prop
    * @return {string}
    */
-  function serializeActorStep (actor) {
+  function serializeActorStep (actor, opt_prop) {
     var serializedProps = ['{'];
+
+    var propsToSerialize;
+    if (opt_prop) {
+      propsToSerialize = {};
+      propsToSerialize[opt_prop] = actor.get()[opt_prop];
+    } else {
+      propsToSerialize = actor.get();
+    }
+
     var printVal;
-    _.each(actor.get(), function (val, key) {
+    _.each(propsToSerialize, function (val, key) {
       printVal = val;
       var printKey = key;
 
