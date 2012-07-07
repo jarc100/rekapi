@@ -324,9 +324,10 @@ var rekapiToCSS = function (context, _) {
 
     var serializedFrames = [];
     var nextProp = fromProp.nextProperty;
-    var fromPercent = 100 / (actor.getLength() / fromProp.millisecond);
-    var delta = nextProp.millisecond - fromProp.millisecond;
-    var incrementSize = actor.getLength() / (delta / increments);
+    var fromPercent = (fromProp.millisecond / actor.getLength()) * 100;
+    var toPercent = (nextProp.millisecond / actor.getLength()) * 100;
+    var delta = toPercent - fromPercent;
+    var incrementSize = (increments / delta) * 100;
 
     var i, adjustedPercent, stepPrefix;
     for (i = 0; i < increments; i++) {
