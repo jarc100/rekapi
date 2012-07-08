@@ -321,15 +321,12 @@ var rekapiToCSS = function (context, _) {
    * @return {string}
    */
   function generateActorTrackKeyframes (actor, track, granularity) {
-    var trackLength = actor.getTrackLength(track);
+    var trackEnd = actor.getEnd(track);
 
-    if (!trackLength) {
+    if (!trackEnd) {
       return '';
     }
 
-    // TODO Refactor this logic into an Actor method.
-    var lastProp = actor.getKeyframeProperty(track, trackLength - 1);
-    var trackEnd = lastProp.millisecond;
     var segmentAccumulator = [];
 
     _.each(actor._propertyTracks[track], function (prop) {
