@@ -332,7 +332,7 @@ var rekapiToCSS = function (context, _) {
     var trackEnd = lastProp.millisecond;
     var segmentAccumulator = [];
 
-    _.each(actor._propertyTracks[track], function (prop, key) {
+    _.each(actor._propertyTracks[track], function (prop) {
       var nextProp = prop.nextProperty;
 
       var segmentLength;
@@ -342,7 +342,10 @@ var rekapiToCSS = function (context, _) {
         segmentLength = trackEnd - prop.millisecond;
       }
 
-      var increments = Math.ceil((segmentLength / trackEnd) * granularity);
+      // increments must be at least 1 to ensure that all segments are
+      // serialized.
+      var increments =
+          Math.ceil((segmentLength / trackEnd) * granularity) || 1;
       var trackSegment = generateActorTrackSegment(actor, prop, increments);
       segmentAccumulator = segmentAccumulator.concat(trackSegment);
     });
