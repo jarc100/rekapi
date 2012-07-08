@@ -316,6 +316,16 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
+   * @param {number} granularity
+   * @return {string}
+   */
+  function generateActorTrackKeyframes (actor, granularity) {
+    return '';
+  }
+
+
+  /**
+   * @param {Kapi.Actor} actor
    * @param {Kapi.KeyframeProperty} fromProp
    * @param {number} increments
    * @return {Array.<string>}
@@ -393,6 +403,7 @@ var rekapiToCSS = function (context, _) {
       ,'getOptimizedEasingFormula': getOptimizedEasingFormula
       ,'generateActorKeyframes': generateActorKeyframes
       ,'generateActorTrackSegment': generateActorTrackSegment
+      ,'generateActorTrackKeyframes': generateActorTrackKeyframes
       ,'serializeActorStep': serializeActorStep
     }
   }

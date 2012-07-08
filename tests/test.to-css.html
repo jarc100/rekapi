@@ -343,6 +343,41 @@
     });
 
 
+    module('generateActorTrackKeyframes');
+
+
+    test('Can generate all keyframe data for a single-track actor',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0   })
+        .keyframe(1000, { 'x': 50  })
+        .keyframe(2000, { 'x': 100 });
+
+      var serializedSegment =
+          Kapi._private.toCSS.generateActorTrackKeyframes(
+              actor1, 10);
+
+      deepEqual(
+          serializedSegment
+          ,['  0% {x:0;}'
+          ,'  10% {x:10;}'
+          ,'  20% {x:20;}'
+          ,'  30% {x:30;}'
+          ,'  40% {x:40;}'
+          ,'  50% {x:50;}'
+          ,'  60% {x:60;}'
+          ,'  70% {x:70;}'
+          ,'  80% {x:80;}'
+          ,'  90% {x:90;}'
+          ,'  100% {x:100;}']
+          ,'Entire track was serialized.');
+    });
+
+
     module('serializeActorStep');
 
 
