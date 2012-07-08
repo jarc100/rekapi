@@ -316,11 +316,38 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
+   * @param {string} track
    * @param {number} granularity
    * @return {string}
    */
-  function generateActorTrackKeyframes (actor, granularity) {
-    return '';
+  function generateActorTrackKeyframes (actor, track, granularity) {
+    var trackLength = actor.getTrackLength(track);
+
+    if (!trackLength) {
+      return '';
+    }
+
+    // TODO Refactor this logic into an Actor method.
+    var lastProp = actor.getKeyframeProperty(track, trackLength - 1);
+    var trackEnd = lastProp.millisecond;
+    var segmentAccumulator = [];
+
+    _.each(actor._propertyTracks[track], function (prop, key) {
+      var nextProp = prop.nextProperty;
+
+      var segmentLength;
+      if (nextProp) {
+        segmentLength = nextProp.millisecond - prop.millisecond;
+      } else {
+        segmentLength = trackEnd - prop.millisecond;
+      }
+
+      var increments = Math.ceil((segmentLength / trackEnd) * granularity);
+      var trackSegment = generateActorTrackSegment(actor, prop, increments);
+      segmentAccumulator = segmentAccumulator.concat(trackSegment);
+    });
+
+    return segmentAccumulator.join('\n');
   }
 
 

@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script>
-  var internalDebugNow = function () {
-        return +(new Date());
-      };
-  var SHIFTY_DEBUG_NOW = function () {
-        return internalDebugNow();
-      };
-  </script>
   <link href="../lib/shifty/tests/qunit/qunit.css" rel="stylesheet" type="text/css" />
   <script src="../lib/shifty/tests/qunit/qunit.js"></script>
   <script src="../lib/underscore/_.js"></script>
@@ -359,9 +351,9 @@
 
       var serializedSegment =
           Kapi._private.toCSS.generateActorTrackKeyframes(
-              actor1, 10);
+              actor1, 'x', 10);
 
-      deepEqual(
+      equal(
           serializedSegment
           ,['  0% {x:0;}'
           ,'  10% {x:10;}'
@@ -373,7 +365,7 @@
           ,'  70% {x:70;}'
           ,'  80% {x:80;}'
           ,'  90% {x:90;}'
-          ,'  100% {x:100;}']
+          ,'  100% {x:100;}'].join('\n')
           ,'Entire track was serialized.');
     });
 
