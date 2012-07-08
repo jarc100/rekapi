@@ -327,7 +327,7 @@ var rekapiToCSS = function (context, _) {
     var fromPercent = (fromProp.millisecond / actor.getLength()) * 100;
     var toPercent = (nextProp.millisecond / actor.getLength()) * 100;
     var delta = toPercent - fromPercent;
-    var incrementSize = (increments / delta) * 100;
+    var incrementSize = delta / increments;
 
     var i, adjustedPercent, stepPrefix;
     for (i = 0; i < increments; i++) {
