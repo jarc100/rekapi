@@ -323,9 +323,16 @@ var rekapiToCSS = function (context, _) {
   function generateActorTrackSegment (actor, fromProp, increments) {
 
     var serializedFrames = [];
-    var nextProp = fromProp.nextProperty;
     var fromPercent = (fromProp.millisecond / actor.getLength()) * 100;
-    var toPercent = (nextProp.millisecond / actor.getLength()) * 100;
+
+    var nextProp = fromProp.nextProperty;
+    var toPercent;
+    if (nextProp) {
+      toPercent = (nextProp.millisecond / actor.getLength()) * 100;
+    } else {
+      toPercent = 100;
+    }
+
     var delta = toPercent - fromPercent;
     var incrementSize = delta / increments;
 
