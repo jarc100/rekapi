@@ -596,6 +596,20 @@
           ,'Generated CSS animation-delay');
     });
 
+
+    module('generateAnimationFillModeProperty');
+
+
+    test('Can generate the CSS fill mode of an animation',
+        function () {
+
+      var animDuration = Kapi._private.toCSS.generateAnimationFillModeProperty(
+          'PREFIX');
+
+      equal(animDuration, '  PREFIXanimation-fill-mode: forwards;'
+          ,'Generated CSS animation-fill-mode');
+    });
+
   } ());
   </script>
 </head>
