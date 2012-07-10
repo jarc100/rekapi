@@ -282,9 +282,10 @@ var rekapiToCSS = function (context, _) {
   /**
    * @param {Kapi.Actor} actor
    * @param {number} granularity
+   * @param {string} opt_track
    * @return {string}
    */
-  function generateActorKeyframes (actor, granularity) {
+  function generateActorKeyframes (actor, granularity, opt_track) {
     var animLength = actor.getLength();
     var delay = actor.getStart();
     var serializedFrames = [];
@@ -296,7 +297,7 @@ var rekapiToCSS = function (context, _) {
     var loopEnd = animLength + delay - increment;
 
     actor.updateState(delay);
-    serializedFrames.push('  0% ' + serializeActorStep(actor));
+    serializedFrames.push('  0% ' + serializeActorStep(actor, opt_track));
 
     var i;
     for (i = loopStart; i <= loopEnd; i += increment) {
@@ -304,11 +305,12 @@ var rekapiToCSS = function (context, _) {
       percent = (i - delay) / animPercent;
       adjustedPercent = +percent.toFixed(2);
       stepPrefix = adjustedPercent + '% ';
-      serializedFrames.push('  ' + stepPrefix + serializeActorStep(actor));
+      serializedFrames.push(
+          '  ' + stepPrefix + serializeActorStep(actor, opt_track));
     }
 
     actor.updateState(animLength + delay);
-    serializedFrames.push('  100% ' + serializeActorStep(actor));
+    serializedFrames.push('  100% ' + serializeActorStep(actor, opt_track));
 
     return serializedFrames.join('\n');
   }
