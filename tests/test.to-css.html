@@ -575,10 +575,17 @@
     test('Can generate the CSS duration of an animation',
         function () {
 
-      var animDuration = Kapi._private.toCSS.generateAnimationDurationProperty(
-          'PREFIX', 5);
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
 
-      equal(animDuration, '  PREFIXanimation-duration: 5ms;'
+      actor1
+        .keyframe(0,    { 'x': 0  })
+        .keyframe(1000, { 'x': 10 });
+
+      var animDuration = Kapi._private.toCSS.generateAnimationDurationProperty(
+          actor1, 'PREFIX');
+
+      equal(animDuration, '  PREFIXanimation-duration: 1000ms;'
           ,'Generated CSS animation-duration');
     });
 
@@ -589,8 +596,15 @@
     test('Can generate the CSS delay of an animation',
         function () {
 
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(500,  { 'x': 0  })
+        .keyframe(1000, { 'x': 10 });
+
       var animDuration = Kapi._private.toCSS.generateAnimationDelayProperty(
-          'PREFIX', 500);
+          actor1, 'PREFIX');
 
       equal(animDuration, '  PREFIXanimation-delay: 500ms;'
           ,'Generated CSS animation-delay');

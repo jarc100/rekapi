@@ -228,13 +228,11 @@ var rekapiToCSS = function (context, _) {
   function generateCSSAnimationProperties (actor, animName, vendor) {
     var generatedProperties = [];
     var prefix = VENDOR_PREFIXES[vendor];
-    var start = actor.getStart();
-    var duration = actor.getEnd() - start;
 
     generatedProperties.push(generateAnimationNameProperty(animName, prefix));
     generatedProperties.push(
-        generateAnimationDurationProperty(prefix, duration));
-    generatedProperties.push(generateAnimationDelayProperty(prefix, start));
+        generateAnimationDurationProperty(actor, prefix));
+    generatedProperties.push(generateAnimationDelayProperty(actor, prefix));
     generatedProperties.push(generateAnimationFillModeProperty(prefix));
 
     return generatedProperties.join('\n');
@@ -252,22 +250,23 @@ var rekapiToCSS = function (context, _) {
 
 
   /**
+   * @param {Kapi.Actor} actor
    * @param {string} animName
-   * @param {number|string} number
    * @return {string}
    */
-  function generateAnimationDurationProperty (prefix, duration) {
-    return printf('  %sanimation-duration: %sms;', [prefix, duration]);
+  function generateAnimationDurationProperty (actor, prefix) {
+    return printf('  %sanimation-duration: %sms;'
+        ,[prefix, actor.getEnd() - actor.getStart()]);
   }
 
 
   /**
-   * @param {string} prefix
+   * @param {Kapi.Actor} actor
    * @param {number|string} delay
    * @return {string}
    */
-  function generateAnimationDelayProperty (prefix, delay) {
-    return printf('  %sanimation-delay: %sms;', [prefix, delay]);
+  function generateAnimationDelayProperty (actor, prefix) {
+    return printf('  %sanimation-delay: %sms;', [prefix, actor.getStart()]);
   }
 
 
