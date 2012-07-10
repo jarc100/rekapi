@@ -234,9 +234,7 @@ var rekapiToCSS = function (context, _) {
     generatedProperties.push(generateAnimationNameProperty(animName, prefix));
     generatedProperties.push(
         generateAnimationDurationProperty(prefix, duration));
-
-    var delay = printf('  %sanimation-delay: %sms;', [prefix, start]);
-    generatedProperties.push(delay);
+    generatedProperties.push(generateAnimationDelayProperty(prefix, start));
 
     var fillMode = printf('  %sanimation-fill-mode: forwards;', [prefix]);
     generatedProperties.push(fillMode);
@@ -262,6 +260,16 @@ var rekapiToCSS = function (context, _) {
    */
   function generateAnimationDurationProperty (prefix, duration) {
     return printf('  %sanimation-duration: %sms;', [prefix, duration]);
+  }
+
+
+  /**
+   * @param {string} prefix
+   * @param {number} delay
+   * @return {string}
+   */
+  function generateAnimationDelayProperty (prefix, delay) {
+    return printf('  %sanimation-delay: %sms;', [prefix, delay]);
   }
 
 
@@ -470,6 +478,7 @@ var rekapiToCSS = function (context, _) {
       ,'serializeActorStep': serializeActorStep
       ,'generateAnimationNameProperty': generateAnimationNameProperty
       ,'generateAnimationDurationProperty': generateAnimationDurationProperty
+      ,'generateAnimationDelayProperty': generateAnimationDelayProperty
     }
   }
 

@@ -582,6 +582,20 @@
           ,'Generated CSS animation-duration');
     });
 
+
+    module('generateAnimationDelayProperty');
+
+
+    test('Can generate the CSS delay of an animation',
+        function () {
+
+      var animDuration = Kapi._private.toCSS.generateAnimationDelayProperty(
+          'PREFIX', 500);
+
+      equal(animDuration, '  PREFIXanimation-delay: 500ms;'
+          ,'Generated CSS animation-delay');
+    });
+
   } ());
   </script>
 </head>
