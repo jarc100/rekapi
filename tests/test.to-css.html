@@ -554,6 +554,23 @@
           ,'Batched keyframe step was serialized');
     });
 
+
+    module('generateAnimationNameProperty');
+
+
+    test('Can generate the CSS name of an animation',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      var animName = Kapi._private.toCSS.generateAnimationNameProperty(
+          'ANIM_NAME', 'PREFIX');
+
+      equal(animName, '  PREFIXanimation-name: ANIM_NAME-keyframes;'
+          ,'Generated CSS animation name');
+    });
+
   } ());
   </script>
 </head>
