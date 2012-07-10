@@ -99,12 +99,31 @@ var rekapiToCSS = function (context, _) {
     var animName = opts.name || this.getCSSName();
     var granularity = opts.granularity || DEFAULT_GRANULARITY;
     var actorClass = generateCSSClass(this, animName, opts.vendors);
-    actorCSS.push(actorClass);
     var boilerplatedKeyframes = generateBoilerplatedKeyframes(
         this, animName, granularity, opts.vendors);
+
+    actorCSS.push(actorClass);
     actorCSS.push(boilerplatedKeyframes);
 
     return actorCSS.join('\n');
+  };
+
+
+  // UTILITY FUNCTIONS
+  //
+
+  /**
+   * @param {string} formatter
+   * @param {[string]} args
+   * @return {string}
+   */
+  var printf = Kapi.util.printf = function (formatter, args) {
+    var composedStr = formatter;
+    _.each(args, function (arg) {
+      composedStr = composedStr.replace('%s', arg);
+    });
+
+    return composedStr;
   };
 
 
@@ -136,29 +155,11 @@ var rekapiToCSS = function (context, _) {
   }
 
 
-  // UTILITY FUNCTIONS
-  //
-
-  /**
-   * @param {string} formatter
-   * @param {[string]} args
-   * @return {string}
-   */
-  var printf = Kapi.util.printf = function (formatter, args) {
-    var composedStr = formatter;
-    _.each(args, function (arg) {
-      composedStr = composedStr.replace('%s', arg);
-    });
-
-    return composedStr;
-  };
-
-
   /**
    * @param {string} toKeyframes Generated keyframes to wrap in boilerplates
    * @param {string} animName
-   * @param {Array.<string>} opt_vendors Vendor boilerplates to be applied.  Should
-   *     be any of the values in Kapi.util.VENDOR_PREFIXES.
+   * @param {Array.<string>} opt_vendors Vendor boilerplates to be applied.
+   *     Should be any of the values in Kapi.util.VENDOR_PREFIXES.
    * @return {string}
    */
   function applyVendorBoilerplates (toKeyframes, animName, opt_vendors) {
