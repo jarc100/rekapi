@@ -296,7 +296,7 @@ var rekapiToCSS = function (context, _) {
     var loopEnd = animLength + delay - increment;
 
     actor.updateState(delay);
-    serializedFrames.push('  from ' + serializeActorStep(actor));
+    serializedFrames.push('  0% ' + serializeActorStep(actor));
 
     var i;
     for (i = loopStart; i <= loopEnd; i += increment) {
@@ -308,7 +308,7 @@ var rekapiToCSS = function (context, _) {
     }
 
     actor.updateState(animLength + delay);
-    serializedFrames.push('  to ' + serializeActorStep(actor));
+    serializedFrames.push('  100% ' + serializeActorStep(actor));
 
     return serializedFrames.join('\n');
   }
