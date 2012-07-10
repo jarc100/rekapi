@@ -232,10 +232,8 @@ var rekapiToCSS = function (context, _) {
     var duration = actor.getEnd() - start;
 
     generatedProperties.push(generateAnimationNameProperty(animName, prefix));
-
-    duration = printf('  %sanimation-duration: %sms;'
-        ,[prefix, duration]);
-    generatedProperties.push(duration);
+    generatedProperties.push(
+        generateAnimationDurationProperty(prefix, duration));
 
     var delay = printf('  %sanimation-delay: %sms;', [prefix, start]);
     generatedProperties.push(delay);
@@ -254,6 +252,16 @@ var rekapiToCSS = function (context, _) {
    */
   function generateAnimationNameProperty (animName, prefix) {
     return printf('  %sanimation-name: %s-keyframes;', [prefix, animName]);
+  }
+
+
+  /**
+   * @param {string} animName
+   * @param {number|string} number
+   * @return {string}
+   */
+  function generateAnimationDurationProperty (prefix, duration) {
+    return printf('  %sanimation-duration: %sms;', [prefix, duration]);
   }
 
 
@@ -461,6 +469,7 @@ var rekapiToCSS = function (context, _) {
       ,'generateActorTrackKeyframes': generateActorTrackKeyframes
       ,'serializeActorStep': serializeActorStep
       ,'generateAnimationNameProperty': generateAnimationNameProperty
+      ,'generateAnimationDurationProperty': generateAnimationDurationProperty
     }
   }
 

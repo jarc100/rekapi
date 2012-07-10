@@ -561,14 +561,25 @@
     test('Can generate the CSS name of an animation',
         function () {
 
-      var kapi = new Kapi();
-      var actor1 = setupTestActor(kapi);
-
       var animName = Kapi._private.toCSS.generateAnimationNameProperty(
           'ANIM_NAME', 'PREFIX');
 
       equal(animName, '  PREFIXanimation-name: ANIM_NAME-keyframes;'
-          ,'Generated CSS animation name');
+          ,'Generated CSS animation-name');
+    });
+
+
+    module('generateAnimationDurationProperty');
+
+
+    test('Can generate the CSS duration of an animation',
+        function () {
+
+      var animDuration = Kapi._private.toCSS.generateAnimationDurationProperty(
+          'PREFIX', 5);
+
+      equal(animDuration, '  PREFIXanimation-duration: 5ms;'
+          ,'Generated CSS animation-duration');
     });
 
   } ());
