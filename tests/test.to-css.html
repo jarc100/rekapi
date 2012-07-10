@@ -225,6 +225,41 @@
     });
 
 
+    module('generateBoilerplatedKeyframes');
+
+
+    test('Can generate boilerplated keyframes',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0   })
+        .keyframe(1000, { 'x': 100 });
+
+      var keyframeData = Kapi._private.toCSS.generateBoilerplatedKeyframes(
+          actor1, 'ANIM_NAME', 10);
+
+      equal(
+          keyframeData
+          ,['@keyframes ANIM_NAME-keyframes {'
+            ,'  0% {x:0;}'
+            ,'  10% {x:10;}'
+            ,'  20% {x:20;}'
+            ,'  30% {x:30;}'
+            ,'  40% {x:40;}'
+            ,'  50% {x:50;}'
+            ,'  60% {x:60;}'
+            ,'  70% {x:70;}'
+            ,'  80% {x:80;}'
+            ,'  90% {x:90;}'
+            ,'  100% {x:100;}'
+            ,'}'].join('\n')
+          ,'Keyframes with W3 boilerplate was generated');
+    });
+
+
     module('generateActorKeyframes');
 
 

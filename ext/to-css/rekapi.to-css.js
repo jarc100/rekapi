@@ -100,24 +100,40 @@ var rekapiToCSS = function (context, _) {
     var granularity = opts.granularity || DEFAULT_GRANULARITY;
     var actorClass = generateCSSClass(this, animName, opts.vendors);
     actorCSS.push(actorClass);
+    var boilerplatedKeyframes = generateBoilerplatedKeyframes(
+        this, animName, granularity, opts.vendors);
+    actorCSS.push(boilerplatedKeyframes);
 
-    var optimizedEasingFormula = getOptimizedEasingFormula(this);
+    return actorCSS.join('\n');
+  };
+
+
+  /**
+   * @param {Kapi.Actor} actor
+   * @param {string} animName
+   * @param {number} granularity
+   * @param {Array.<string>=} opt_vendors
+   * @return {string}
+   */
+  function generateBoilerplatedKeyframes (
+      actor, animName, granularity, opt_vendors) {
+
+    var optimizedEasingFormula = getOptimizedEasingFormula(actor);
     var keyframes;
 
     // TODO: CSS optimization is _extremely_ incomplete.  It only supports
     // single-step animations with one keyframe property.
     if (typeof optimizedEasingFormula === 'string') {
-      keyframes = generateOptimizedKeyframes(this, optimizedEasingFormula);
+      keyframes = generateOptimizedKeyframes(actor, optimizedEasingFormula);
     } else {
-      keyframes = generateActorKeyframes(this, granularity);
+      keyframes = generateActorKeyframes(actor, granularity);
     }
 
     var boilerplatedKeyframes = applyVendorBoilerplates(
-        keyframes, animName, opts.vendors);
-    actorCSS.push(boilerplatedKeyframes);
+        keyframes, animName, opt_vendors);
 
-    return actorCSS.join('\n');
-  };
+    return boilerplatedKeyframes;
+  }
 
 
   // UTILITY FUNCTIONS
@@ -426,6 +442,7 @@ var rekapiToCSS = function (context, _) {
       ,'VENDOR_TOKEN': VENDOR_TOKEN
       ,'applyVendorBoilerplates': applyVendorBoilerplates
       ,'applyVendorPropertyPrefixes': applyVendorPropertyPrefixes
+      ,'generateBoilerplatedKeyframes': generateBoilerplatedKeyframes
       ,'generateCSSClass': generateCSSClass
       ,'generateCSSAnimationProperties': generateCSSAnimationProperties
       ,'generateOptimizedKeyframes': generateOptimizedKeyframes
