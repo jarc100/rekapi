@@ -156,6 +156,7 @@ var rekapiToCSS = function (context, _) {
     } else {
       boilerplatedKeyframes = [];
       var trackNames = _.keys(actor._propertyTracks);
+      var trackNames = actor.getTrackNames();
 
       _.each(trackNames, function (trackName) {
         boilerplatedKeyframes.push(applyVendorBoilerplates(
@@ -263,7 +264,8 @@ var rekapiToCSS = function (context, _) {
   function generateAnimationNameProperty (actor, animName, prefix) {
     var animationName = printf('  %sanimation-name:', [prefix]);
 
-    _.each(actor._propertyTracks, function (track, trackName) {
+    var tracks = actor.getTrackNames();
+    _.each(tracks, function (trackName) {
       animationName += printf(' %s-%s-keyframes,', [animName, trackName]);
     });
 
