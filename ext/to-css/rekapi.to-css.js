@@ -148,23 +148,16 @@ var rekapiToCSS = function (context, _) {
       keyframes = generateActorKeyframes(actor, granularity);
     }
 
-    var boilerplatedKeyframes;
+    var boilerplatedKeyframes = [];
+    var trackNames = _.keys(actor._propertyTracks);
+    var trackNames = actor.getTrackNames();
 
-    if (actor._propertyTracks.length === 1) {
-      boilerplatedKeyframes = applyVendorBoilerplates(
-          keyframes, animName, opt_vendors);
-    } else {
-      boilerplatedKeyframes = [];
-      var trackNames = _.keys(actor._propertyTracks);
-      var trackNames = actor.getTrackNames();
+    _.each(trackNames, function (trackName) {
+      boilerplatedKeyframes.push(applyVendorBoilerplates(
+        keyframes, (animName + '-' + trackName), opt_vendors));
+    });
 
-      _.each(trackNames, function (trackName) {
-        boilerplatedKeyframes.push(applyVendorBoilerplates(
-          keyframes, (animName + '-' + trackName), opt_vendors));
-      });
-
-      boilerplatedKeyframes = boilerplatedKeyframes.join('\n');
-    }
+    boilerplatedKeyframes = boilerplatedKeyframes.join('\n');
 
     return boilerplatedKeyframes;
   }
