@@ -99,13 +99,15 @@
       var kapi = new Kapi();
       var actor1 = setupTestActor(kapi);
 
+      actor1.keyframe(0, { 'x': 0 });
+
       var classProperties =
           Kapi._private.toCSS.generateCSSAnimationProperties(
               actor1, 'ANIM_NAME', 'w3');
 
       equal(
           classProperties
-          ,['  animation-name: ANIM_NAME-keyframes;'
+          ,['  animation-name: ANIM_NAME-x-keyframes;'
           ,'  animation-duration: 0ms;'
           ,'  animation-delay: 0ms;'
           ,'  animation-fill-mode: forwards;'].join('\n')
@@ -119,13 +121,15 @@
       var kapi = new Kapi();
       var actor1 = setupTestActor(kapi);
 
+      actor1.keyframe(0, { 'x': 0 });
+
       var classProperties =
           Kapi._private.toCSS.generateCSSAnimationProperties(
               actor1, 'ANIM_NAME', 'webkit');
 
       equal(
           classProperties
-          ,['  -webkit-animation-name: ANIM_NAME-keyframes;'
+          ,['  -webkit-animation-name: ANIM_NAME-x-keyframes;'
           ,'  -webkit-animation-duration: 0ms;'
           ,'  -webkit-animation-delay: 0ms;'
           ,'  -webkit-animation-fill-mode: forwards;'].join('\n')
@@ -142,13 +146,15 @@
       var kapi = new Kapi();
       var actor1 = setupTestActor(kapi);
 
+      actor1.keyframe(0, { 'x': 0 });
+
       var classProperties =
           Kapi._private.toCSS.generateCSSClass(actor1, 'ANIM_NAME');
 
       equal(
           classProperties
           ,['.ANIM_NAME {'
-          ,'  animation-name: ANIM_NAME-keyframes;'
+          ,'  animation-name: ANIM_NAME-x-keyframes;'
           ,'  animation-duration: 0ms;'
           ,'  animation-delay: 0ms;'
           ,'  animation-fill-mode: forwards;'
@@ -163,6 +169,8 @@
       var kapi = new Kapi();
       var actor1 = setupTestActor(kapi);
 
+      actor1.keyframe(0, { 'x': 0 });
+
       var classProperties =
           Kapi._private.toCSS.generateCSSClass(
               actor1, 'ANIM_NAME', ['webkit']);
@@ -170,7 +178,7 @@
       equal(
           classProperties
           ,['.ANIM_NAME {'
-          ,'  -webkit-animation-name: ANIM_NAME-keyframes;'
+          ,'  -webkit-animation-name: ANIM_NAME-x-keyframes;'
           ,'  -webkit-animation-duration: 0ms;'
           ,'  -webkit-animation-delay: 0ms;'
           ,'  -webkit-animation-fill-mode: forwards;'
@@ -243,7 +251,7 @@
 
       equal(
           keyframeData
-          ,['@keyframes ANIM_NAME-keyframes {'
+          ,['@keyframes ANIM_NAME-x-keyframes {'
             ,'  0% {x:0;}'
             ,'  10% {x:10;}'
             ,'  20% {x:20;}'
@@ -561,10 +569,36 @@
     test('Can generate the CSS name of an animation',
         function () {
 
-      var animName = Kapi._private.toCSS.generateAnimationNameProperty(
-          'ANIM_NAME', 'PREFIX');
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
 
-      equal(animName, '  PREFIXanimation-name: ANIM_NAME-keyframes;'
+      actor1
+        .keyframe(0,    { 'x': 0,  'y': 50  })
+        .keyframe(1000, { 'x': 10, 'y': 100 });
+
+      var animName = Kapi._private.toCSS.generateAnimationNameProperty(
+          actor1, 'ANIM_NAME', 'PREFIX');
+
+      equal(animName
+          ,'  PREFIXanimation-name: ANIM_NAME-x-keyframes, ANIM_NAME-y-keyframes;'
+          ,'Generated CSS animation-name');
+    });
+
+
+    test('Can generate the CSS name of an animation with multiple properties',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0,  'y': 50  })
+        .keyframe(1000, { 'x': 10, 'y': 100 });
+
+      var animName = Kapi._private.toCSS.generateAnimationNameProperty(
+          actor1, 'ANIM_NAME', 'PREFIX');
+
+      equal(animName, '  PREFIXanimation-name: ANIM_NAME-x-keyframes, ANIM_NAME-y-keyframes;'
           ,'Generated CSS animation-name');
     });
 

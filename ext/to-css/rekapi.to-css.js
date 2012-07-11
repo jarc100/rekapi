@@ -148,8 +148,22 @@ var rekapiToCSS = function (context, _) {
       keyframes = generateActorKeyframes(actor, granularity);
     }
 
-    var boilerplatedKeyframes = applyVendorBoilerplates(
-        keyframes, animName, opt_vendors);
+    var boilerplatedKeyframes;
+
+    if (actor._propertyTracks.length === 1) {
+      boilerplatedKeyframes = applyVendorBoilerplates(
+          keyframes, animName, opt_vendors);
+    } else {
+      boilerplatedKeyframes = [];
+      var trackNames = _.keys(actor._propertyTracks);
+
+      _.each(trackNames, function (trackName) {
+        boilerplatedKeyframes.push(applyVendorBoilerplates(
+          keyframes, (animName + '-' + trackName), opt_vendors));
+      });
+
+      boilerplatedKeyframes = boilerplatedKeyframes.join('\n');
+    }
 
     return boilerplatedKeyframes;
   }
@@ -229,7 +243,8 @@ var rekapiToCSS = function (context, _) {
     var generatedProperties = [];
     var prefix = VENDOR_PREFIXES[vendor];
 
-    generatedProperties.push(generateAnimationNameProperty(animName, prefix));
+    generatedProperties.push(generateAnimationNameProperty(
+          actor, animName, prefix));
     generatedProperties.push(
         generateAnimationDurationProperty(actor, prefix));
     generatedProperties.push(generateAnimationDelayProperty(actor, prefix));
@@ -240,12 +255,22 @@ var rekapiToCSS = function (context, _) {
 
 
   /**
+   * @param {Kapi.Actor} actor
    * @param {string} animName
    * @param {string} prefix
    * @return {string}
    */
-  function generateAnimationNameProperty (animName, prefix) {
-    return printf('  %sanimation-name: %s-keyframes;', [prefix, animName]);
+  function generateAnimationNameProperty (actor, animName, prefix) {
+    var animationName = printf('  %sanimation-name:', [prefix]);
+
+    _.each(actor._propertyTracks, function (track, trackName) {
+      animationName += printf(' %s-%s-keyframes,', [animName, trackName]);
+    });
+
+    animationName = animationName.slice(0, animationName.length - 1);
+    animationName += ';';
+
+    return animationName;
   }
 
 
