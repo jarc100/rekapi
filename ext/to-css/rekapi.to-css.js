@@ -358,13 +358,16 @@ var rekapiToCSS = function (context, _) {
   function generateActorKeyframes (actor, granularity, track) {
     var serializedFrames = [];
     var actorEnd = actor.getEnd();
+    var actorStart = actor.getStart();
 
     _.each(actor._propertyTracks[track], function (prop, propName) {
-      var fromPercent = (prop.millisecond / actor.getLength()) * 100;
+      var fromPercent =
+          ((prop.millisecond - actorStart) / actor.getLength()) * 100;
       var nextProp = prop.nextProperty;
       var toPercent;
       if (nextProp) {
-        toPercent = (nextProp.millisecond / actor.getLength()) * 100;
+        toPercent =
+          ((nextProp.millisecond - actorStart) / actor.getLength()) * 100;
       } else {
         toPercent = 100;
       }
@@ -394,10 +397,12 @@ var rekapiToCSS = function (context, _) {
       actor, fromProp, increments, incrementSize, fromPercent) {
 
     var serializedFrames = [];
+    var actorStart = actor.getStart();
     var i, adjustedPercent, stepPrefix;
     for (i = 0; i < increments; i++) {
       adjustedPercent = fromPercent + (i * incrementSize);
-      actor.updateState( (adjustedPercent / 100) * actor.getLength() );
+      actor.updateState(
+          ((adjustedPercent / 100) * actor.getLength()) + actorStart);
       stepPrefix = +adjustedPercent.toFixed(2) + '% ';
       serializedFrames.push(
           '  ' + stepPrefix + serializeActorStep(actor, fromProp.name));
