@@ -352,35 +352,31 @@ var rekapiToCSS = function (context, _) {
   /**
    * @param {Kapi.Actor} actor
    * @param {number} granularity
-   * @param {string} opt_track
+   * @param {string} track
    * @return {string}
    */
-  function generateActorKeyframes (actor, granularity, opt_track) {
-    var animLength = actor.getLength();
-    var delay = actor.getStart();
+  function generateActorKeyframes (actor, granularity, track) {
+    // TODO:  LOTS of duplicated code between here and
+    // generateActorTrackSegment.  Clean it up.
     var serializedFrames = [];
-    var percent, adjustedPercent, stepPrefix;
-    var increment = animLength / granularity;
-    var adjustedIncrement = Math.floor(increment);
-    var animPercent = animLength / 100;
-    var loopStart = delay + increment;
-    var loopEnd = animLength + delay - increment;
+    var actorEnd = actor.getEnd();
 
-    actor.updateState(delay);
-    serializedFrames.push('  0% ' + serializeActorStep(actor, opt_track));
+    _.each(actor._propertyTracks[track], function (prop, propName) {
+      var fromPercent = (prop.millisecond / actor.getLength()) * 100;
+      var nextProp = prop.nextProperty;
+      var toPercent;
+      if (nextProp) {
+        toPercent = (nextProp.millisecond / actor.getLength()) * 100;
+      } else {
+        toPercent = 100;
+      }
 
-    var i;
-    for (i = loopStart; i <= loopEnd; i += increment) {
-      actor.updateState(i);
-      percent = (i - delay) / animPercent;
-      adjustedPercent = +percent.toFixed(2);
-      stepPrefix = adjustedPercent + '% ';
-      serializedFrames.push(
-          '  ' + stepPrefix + serializeActorStep(actor, opt_track));
-    }
+      var delta = toPercent - fromPercent;
+      var increments = Math.floor((delta / 100) * granularity) || 1;
+      var trackSegment = generateActorTrackSegment(actor, prop, increments);
 
-    actor.updateState(animLength + delay);
-    serializedFrames.push('  100% ' + serializeActorStep(actor, opt_track));
+      serializedFrames.push(trackSegment.join('\n'));
+    });
 
     return serializedFrames.join('\n');
   }

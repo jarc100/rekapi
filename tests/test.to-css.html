@@ -282,7 +282,7 @@
         .keyframe(1000, { 'x': 100 });
 
       var keyframeData =
-          Kapi._private.toCSS.generateActorKeyframes(actor1, 10);
+          Kapi._private.toCSS.generateActorKeyframes(actor1, 10, 'x');
 
       equal(
           keyframeData
@@ -346,7 +346,7 @@
         .keyframe(1000, { 'x': 100 });
 
       var keyframeData =
-          Kapi._private.toCSS.generateActorKeyframes(actor1, 100);
+          Kapi._private.toCSS.generateActorKeyframes(actor1, 100, 'x');
 
       equal(keyframeData.split('\n').length, 101
           ,'Correct number of steps were interpolated');
