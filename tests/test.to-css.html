@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+  var internalDebugNow = function () {
+        return +(new Date());
+      };
+  var SHIFTY_DEBUG_NOW = function () {
+        return internalDebugNow();
+      };
+  </script>
+  <link href="../lib/shifty/tests/qunit/qunit.css" rel="stylesheet" type="text/css" />
+  <script src="../lib/shifty/tests/qunit/qunit.js"></script>
+  <script src="../lib/underscore/_.js"></script>
+  <script src="../lib/shifty/dist/shifty.js"></script>
+  <script src="../src/rekapi.core.js"></script>
+  <script src="../src/rekapi.actor.js"></script>
+  <script src="../src/rekapi.keyframeprops.js"></script>
+  <script src="../ext/to-css/rekapi.to-css.js"></script>
+  <script src="../src/rekapi.init.js"></script>
+  <script>
+
+  function  setupTestActor (forKapi) {
+    var actor = new Kapi.Actor();
+    forKapi.addActor(actor);
+    return actor;
+  }
+
+  (function () {
+
+    module('applyVendorBoilerplates');
+
+
+    test('Applies boilerplate for W3 by default',
+        function () {
+
+      var vendorBoilerplates =
+          Kapi._private.toCSS.applyVendorBoilerplates('KEYFRAMES', 'NAME');
+
+      equal(
+          vendorBoilerplates
+            ,['@keyframes NAME-keyframes {'
+            ,'KEYFRAMES'
+            ,'}'].join('\n')
+          ,'Vendor-less W3 keyframe boilerplate was generated');
+    });
+
+
+    test('Applies boilerplate for other vendors',
+        function () {
+
+      var vendorBoilerplates =
+          Kapi._private.toCSS.applyVendorBoilerplates('KEYFRAMES', 'NAME', [
+          'w3', 'webkit']);
+
+      equal(
+          vendorBoilerplates
+            ,['@keyframes NAME-keyframes {'
+            ,'KEYFRAMES'
+            ,'}'
+            ,'@-webkit-keyframes NAME-keyframes {'
+            ,'KEYFRAMES'
+            ,'}'].join('\n')
+          ,'Webkit and W3 keyframe boilerplate was generated');
+    });
+
+
+    module('applyVendorPropertyPrefixes');
+
+
+    test('Converts transform token into valid unprefixed property',
+        function () {
+
+      var keyframe =
+          'from: { ' + Kapi._private.toCSS.TRANSFORM_TOKEN + ': foo; }';
+      var vendorBoilerplates =
+          Kapi._private.toCSS.applyVendorPropertyPrefixes(keyframe, 'w3');
+
+      equal(
+          vendorBoilerplates
+          ,'from: { transform: foo; }'
+          ,'Transform property was generated');
+    });
+
+
+    test('Converts transform token into valid prefixed property',
+        function () {
+
+      var keyframe =
+          'from: { ' + Kapi._private.toCSS.TRANSFORM_TOKEN + ': foo; }';
+      var vendorBoilerplates =
+          Kapi._private.toCSS.applyVendorPropertyPrefixes(keyframe, 'webkit');
+
+      equal(
+          vendorBoilerplates
+          ,'from: { -webkit-transform: foo; }'
+          ,'Webkit transform property was generated');
+    });
+
+
+    module('generateCSSAnimationProperties');
+
+
+    test('Generates all W3 CSS properties for an animation',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      var classProperties =
+          Kapi._private.toCSS.generateCSSAnimationProperties(
+              actor1, 'ANIM_NAME', 'w3');
+
+      equal(
+          classProperties
+          ,['  animation-name: ANIM_NAME-keyframes;'
+          ,'  animation-duration: 0ms;'
+          ,'  animation-delay: 0ms;'
+          ,'  animation-fill-mode: forwards;'].join('\n')
+          ,'Class properties for Webkit were generated');
+    });
+
+
+    test('Generates all vendor-prefixed CSS properties for an animation',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      var classProperties =
+          Kapi._private.toCSS.generateCSSAnimationProperties(
+              actor1, 'ANIM_NAME', 'webkit');
+
+      equal(
+          classProperties
+          ,['  -webkit-animation-name: ANIM_NAME-keyframes;'
+          ,'  -webkit-animation-duration: 0ms;'
+          ,'  -webkit-animation-delay: 0ms;'
+          ,'  -webkit-animation-fill-mode: forwards;'].join('\n')
+          ,'Class properties for Webkit were generated');
+    });
+
+
+    module('generateCSSClass');
+
+
+    test('Generates boilerplated class properties for prefix-less class',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      var classProperties =
+          Kapi._private.toCSS.generateCSSClass(actor1, 'ANIM_NAME');
+
+      equal(
+          classProperties
+          ,['.ANIM_NAME {'
+          ,'  animation-name: ANIM_NAME-keyframes;'
+          ,'  animation-duration: 0ms;'
+          ,'  animation-delay: 0ms;'
+          ,'  animation-fill-mode: forwards;'
+          ,'}'].join('\n')
+          ,'Class properties were generated');
+    });
+
+
+    test('Generates boilerplated class properties for a vendor-prefixed class',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      var classProperties =
+          Kapi._private.toCSS.generateCSSClass(
+              actor1, 'ANIM_NAME', ['webkit']);
+
+      equal(
+          classProperties
+          ,['.ANIM_NAME {'
+          ,'  -webkit-animation-name: ANIM_NAME-keyframes;'
+          ,'  -webkit-animation-duration: 0ms;'
+          ,'  -webkit-animation-delay: 0ms;'
+          ,'  -webkit-animation-fill-mode: forwards;'
+          ,'}'].join('\n')
+          ,'Class properties for Webkit were generated');
+    });
+
+
+    module('generateOptimizedKeyframes');
+
+
+    test('Generates optimized keyframe data for an Actor',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0  })
+        .keyframe(1000, { 'x': 10 });
+
+      var keyframeData =
+          Kapi._private.toCSS.generateOptimizedKeyframes(actor1, 'easeInQuad');
+
+      equal(
+          keyframeData
+          ,['from { x: 0; VENDORanimation-timing-function: cubic-bezier(easeInQuad); }'
+          ,'to { x: 10; VENDORanimation-timing-function: cubic-bezier(easeInQuad); }']
+          .join('\n')
+          ,'Optimized bezier-cubic CSS was generated');
+    });
+
+
+    module('getOptimizedEasingFormula');
+
+
+    test('Can lookup cubic-bezier equivalent of a valid Penner formula',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0  }, { 'x': 'easeInQuad' })
+        .keyframe(1000, { 'x': 10 }, { 'x': 'easeInQuad' });
+
+      var cubicBezier =
+          Kapi._private.toCSS.getOptimizedEasingFormula(actor1);
+
+      equal(cubicBezier, '.55,.085,.68,.53'
+          ,'cubic-bezier coordinates were found');
+    });
+
+
+    module('generateActorKeyframes');
+
+
+    test('Can generate un-optimized keyframe data',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0   })
+        .keyframe(1000, { 'x': 100 });
+
+      var keyframeData =
+          Kapi._private.toCSS.generateActorKeyframes(actor1, 10);
+
+      equal(
+          keyframeData
+          ,['  from {x:0;}'
+            ,'  10% {x:10;}'
+            ,'  20% {x:20;}'
+            ,'  30% {x:30;}'
+            ,'  40% {x:40;}'
+            ,'  50% {x:50;}'
+            ,'  60% {x:60;}'
+            ,'  70% {x:70;}'
+            ,'  80% {x:80;}'
+            ,'  90% {x:90;}'
+            ,'  to {x:100;}'].join('\n')
+          ,'Each stage of the animation was interpolated');
+      equal(keyframeData.split('\n').length, 11
+          ,'Correct number of steps were interpolated');
+    });
+
+
+    test('Can control granularity of un-optimized keyframe data',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0   })
+        .keyframe(1000, { 'x': 100 });
+
+      var keyframeData =
+          Kapi._private.toCSS.generateActorKeyframes(actor1, 100);
+
+      equal(keyframeData.split('\n').length, 101
+          ,'Correct number of steps were interpolated');
+    });
+
+
+    module('serializeActorStep');
+
+
+    test('Can serialize an individual Actor step',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0   })
+        .keyframe(1000, { 'x': 100 });
+
+      actor1.updateState(500);
+
+      var serializedStep =
+          Kapi._private.toCSS.serializeActorStep(actor1);
+
+      equal(serializedStep, '{x:50;}'
+          ,'Arbitrary keyframe step was serialized');
+    });
+
+
+    test('Serialized tranform properties are rewritten',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'transform': 'rotate(0deg)'   })
+        .keyframe(1000, { 'transform': 'rotate(100deg)' });
+
+      actor1.updateState(500);
+
+      var serializedStep =
+          Kapi._private.toCSS.serializeActorStep(actor1);
+
+      equal(
+          serializedStep
+          ,'{' + Kapi._private.toCSS.TRANSFORM_TOKEN + ':rotate(50deg);}'
+          ,'Arbitrary keyframe step was serialized');
+    });
+
+
+    test('Multiple properties are batched together for serialization',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0,  'y': 50  })
+        .keyframe(1000, { 'x': 10, 'y': 100 });
+
+      actor1.updateState(500);
+
+      var serializedStep =
+          Kapi._private.toCSS.serializeActorStep(actor1);
+
+      ok(
+          ( serializedStep === '{x:5;y:75;}'
+              || serializedStep === '{y:75;x:5;}' )
+          ,'Batched keyframe step was serialized');
+    });
+
+  } ());
+  </script>
+</head>
+<body>
+  <h1 id="qunit-header"><a href="https://github.com/jeremyckahn/rekapi">Rekapi</a></h1>
+   <h2 id="qunit-banner"></h2>
+   <div id="qunit-testrunner-toolbar"></div>
+   <h2 id="qunit-userAgent"></h2>
+   <ol id="qunit-tests"></ol>
+   <div id="qunit-fixture"></div>
+</body>
+</html>

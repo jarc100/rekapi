@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, plusplus: true, undef: true, vars: true, white: true */
 /**
- * Rekapi - Rewritten Kapi. v0.10.0 (Sun, 01 Jul 2012 16:48:27 GMT)
+ * Rekapi - Rewritten Kapi. v0.10.6 (Thu, 12 Jul 2012 02:38:59 GMT)
  * https://github.com/jeremyckahn/rekapi
  *
  * By Jeremy Kahn (jeremyckahn@gmail.com), with significant contributions from
@@ -14,7 +14,7 @@
 ;(function (global) {
 // A hack for UglifyJS defines
 if (typeof KAPI_DEBUG === 'undefined') {
-  var KAPI_DEBUG = true;
+  KAPI_DEBUG = true;
 }
 
 
@@ -891,7 +891,7 @@ var rekapiActor = function (context, _, Tweenable) {
   /**
    * @param {string} property
    * @param {number} index
-   * @return {Kapi.KeyframeProperty}
+   * @return {Kapi.KeyframeProperty|undefined}
    */
   Actor.prototype.getKeyframeProperty = function (property, index) {
     if (this._propertyTracks[property]
@@ -996,16 +996,21 @@ var rekapiActor = function (context, _, Tweenable) {
 
 
   /**
+   * @param {string} opt_trackName
    * @return {number}
    */
-  Actor.prototype.getStart = function () {
+  Actor.prototype.getStart = function (opt_trackName) {
     var starts = [];
 
-    _.each(this._propertyTracks, function (propertyTrack) {
-      if (propertyTrack.length) {
-        starts.push(propertyTrack[0].millisecond);
-      }
-    });
+    if (opt_trackName) {
+      starts.push(this._propertyTracks[opt_trackName][0].millisecond);
+    } else {
+      _.each(this._propertyTracks, function (propertyTrack) {
+        if (propertyTrack.length) {
+          starts.push(propertyTrack[0].millisecond);
+        }
+      });
+    }
 
     if (starts.length === 0) {
       starts = [0];
@@ -1016,12 +1021,19 @@ var rekapiActor = function (context, _, Tweenable) {
 
 
   /**
+   * @param {string} opt_trackName
    * @return {number}
    */
-  Actor.prototype.getEnd = function () {
+  Actor.prototype.getEnd = function (opt_trackName) {
     var latest = 0;
+    var tracksToInspect = this._propertyTracks;
 
-    _.each(this._propertyTracks, function (propertyTrack) {
+    if (opt_trackName) {
+      tracksToInspect = {};
+      tracksToInspect[opt_trackName] = this._propertyTracks[opt_trackName];
+    }
+
+    _.each(tracksToInspect, function (propertyTrack) {
       if (propertyTrack.length) {
         var trackLength = _.last(propertyTrack).millisecond;
 
@@ -1036,10 +1048,11 @@ var rekapiActor = function (context, _, Tweenable) {
 
 
   /**
+   * @param {string} opt_trackName
    * @return {number}
    */
-  Actor.prototype.getLength = function () {
-    return this.getEnd() - this.getStart();
+  Actor.prototype.getLength = function (opt_trackName) {
+    return this.getEnd(opt_trackName) - this.getStart(opt_trackName);
   };
 
 
@@ -1062,7 +1075,9 @@ var rekapiActor = function (context, _, Tweenable) {
     }
 
     return _.find(tracks, function (propertyTrack, trackName) {
-      return findPropertyAtMillisecondInTrack(this, trackName, when) !== undefined;
+      var retrievedProperty =
+          findPropertyAtMillisecondInTrack(this, trackName, when);
+      return retrievedProperty !== undefined;
     }, this) !== undefined;
   };
 
@@ -1821,7 +1836,7 @@ var rekapiToCSS = function (context, _) {
     var actorCSS = [];
     var animName = opts.name || this.getCSSName();
     var granularity = opts.granularity || DEFAULT_GRANULARITY;
-    var actorClass = generateCSSClass(this, opts.vendors, animName);
+    var actorClass = generateCSSClass(this, animName, opts.vendors);
     actorCSS.push(actorClass);
 
     var optimizedEasingFormula = getOptimizedEasingFormula(this);
@@ -1904,16 +1919,17 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
-   * @param {Array.<string>} opt_vendors
    * @param {string} animName
+   * @param {Array.<string>} opt_vendors
+   * @return {string}
    */
-  function generateCSSClass (actor, opt_vendors, animName) {
+  function generateCSSClass (actor, animName, opt_vendors) {
     opt_vendors = opt_vendors || ['w3'];
     var classAttrs = [];
     var vendorAttrs;
 
     _.each(opt_vendors, function (vendor) {
-      vendorAttrs = generateCSSAnimationProperties(actor, vendor, animName);
+      vendorAttrs = generateCSSAnimationProperties(actor, animName, vendor);
       classAttrs.push(vendorAttrs);
     });
 
@@ -1926,10 +1942,11 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
-   * @param {string} vendor
    * @param {string} animName
+   * @param {string} vendor
+   * @return {string}
    */
-  function generateCSSAnimationProperties (actor, vendor, animName) {
+  function generateCSSAnimationProperties (actor, animName, vendor) {
     var generatedProperties = [];
     var prefix = VENDOR_PREFIXES[vendor];
     var start = actor.getStart();
@@ -1985,7 +2002,7 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
-   * @return {boolean|undefined}
+   * @return {string}
    */
   function getOptimizedEasingFormula (actor) {
     var trackNames = actor.getTrackNames();
@@ -2057,6 +2074,21 @@ var rekapiToCSS = function (context, _) {
     return serializedProps.join('');
   }
 
+  if (KAPI_DEBUG) {
+    Kapi._private.toCSS = {
+      'TRANSFORM_TOKEN': TRANSFORM_TOKEN
+      ,'VENDOR_TOKEN': VENDOR_TOKEN
+      ,'applyVendorBoilerplates': applyVendorBoilerplates
+      ,'applyVendorPropertyPrefixes': applyVendorPropertyPrefixes
+      ,'generateCSSClass': generateCSSClass
+      ,'generateCSSAnimationProperties': generateCSSAnimationProperties
+      ,'generateOptimizedKeyframes': generateOptimizedKeyframes
+      ,'getOptimizedEasingFormula': getOptimizedEasingFormula
+      ,'generateActorKeyframes': generateActorKeyframes
+      ,'serializeActorStep': serializeActorStep
+    }
+  }
+
 };
 var rekapi = function (global, deps) {
 
@@ -2102,7 +2134,7 @@ if (typeof define === 'function' && define.amd) {
   // The rekapi module is anonymous so that it can be required with any name.
   // Example: define(['lib/rekapi.min'], function(Kapi) { ... });
   define(['shifty', 'underscore'], function (Tweenable, Underscore) {
-    var underscoreSupportsAMD = (Underscore !== null);
+    var underscoreSupportsAMD = (Underscore != null);
     var deps = {  Tweenable: Tweenable,
                   // Some versions of Underscore.js support AMD, others don't.
                   // If not, use the `_` global.
