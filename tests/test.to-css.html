@@ -369,7 +369,7 @@
 
       var serializedSegment =
           Kapi._private.toCSS.generateActorTrackSegment(
-              actor1, actor1._propertyTracks['x'][1], 5);
+              actor1, actor1._propertyTracks['x'][1], 5, 10, 50);
 
       deepEqual(
           serializedSegment
@@ -397,7 +397,7 @@
 
       var serializedSegment =
           Kapi._private.toCSS.generateActorTrackSegment(
-              actor1, actor1._propertyTracks['x'][1], 5);
+              actor1, actor1._propertyTracks['x'][1], 5, 5, 25);
 
       deepEqual(
           serializedSegment
@@ -407,72 +407,6 @@
           ,'  40% {x:160;}'
           ,'  45% {x:180;}']
           ,'Arbitrary keyframe step was serialized');
-    });
-
-
-    module('generateActorTrackKeyframes');
-
-
-    test('Can generate all keyframe data for a single-track actor',
-        function () {
-
-      var kapi = new Kapi();
-      var actor1 = setupTestActor(kapi);
-
-      actor1
-        .keyframe(0,    { 'x': 0   })
-        .keyframe(1000, { 'x': 50  })
-        .keyframe(2000, { 'x': 100 });
-
-      var serializedTrack =
-          Kapi._private.toCSS.generateActorTrackKeyframes(
-              actor1, 'x', 10);
-
-      equal(
-          serializedTrack
-          ,['  0% {x:0;}'
-          ,'  10% {x:10;}'
-          ,'  20% {x:20;}'
-          ,'  30% {x:30;}'
-          ,'  40% {x:40;}'
-          ,'  50% {x:50;}'
-          ,'  60% {x:60;}'
-          ,'  70% {x:70;}'
-          ,'  80% {x:80;}'
-          ,'  90% {x:90;}'
-          ,'  100% {x:100;}'].join('\n')
-          ,'Entire track was serialized.');
-    });
-
-
-    test('Can generate all keyframe data for a single-track actor with more steps',
-        function () {
-
-      var kapi = new Kapi();
-      var actor1 = setupTestActor(kapi);
-
-      actor1
-        .keyframe(0,    { 'x': 0   })
-        .keyframe(500,  { 'x': 25  })
-        .keyframe(1000, { 'x': 50  })
-        .keyframe(1500, { 'x': 75  })
-        .keyframe(2000, { 'x': 100 });
-
-      var serializedTrack =
-          Kapi._private.toCSS.generateActorTrackKeyframes(
-              actor1, 'x', 10);
-
-      var trackLines = serializedTrack.split('\n');
-      equal(trackLines[0], '  0% {x:0;}'
-          ,'Start of first segment was exact');
-      equal(trackLines[3], '  25% {x:25;}'
-          ,'Start of second segment was exact');
-      equal(trackLines[6], '  50% {x:50;}'
-          ,'Start of third segment was exact');
-      equal(trackLines[9], '  75% {x:75;}'
-          ,'Start of fourth segment was exact');
-      equal(trackLines[12], '  100% {x:100;}'
-          ,'Start of fifth segment was exact');
     });
 
 

@@ -356,8 +356,6 @@ var rekapiToCSS = function (context, _) {
    * @return {string}
    */
   function generateActorKeyframes (actor, granularity, track) {
-    // TODO:  LOTS of duplicated code between here and
-    // generateActorTrackSegment.  Clean it up.
     var serializedFrames = [];
     var actorEnd = actor.getEnd();
 
@@ -373,7 +371,9 @@ var rekapiToCSS = function (context, _) {
 
       var delta = toPercent - fromPercent;
       var increments = Math.floor((delta / 100) * granularity) || 1;
-      var trackSegment = generateActorTrackSegment(actor, prop, increments);
+      var incrementSize = delta / increments;
+      var trackSegment = generateActorTrackSegment(
+          actor, prop, increments, incrementSize, fromPercent);
 
       serializedFrames.push(trackSegment.join('\n'));
     });
@@ -386,24 +386,14 @@ var rekapiToCSS = function (context, _) {
    * @param {Kapi.Actor} actor
    * @param {Kapi.KeyframeProperty} fromProp
    * @param {number} increments
+   * @param {number} incrementSize
+   * @param {number} fromPercent
    * @return {Array.<string>}
    */
-  function generateActorTrackSegment (actor, fromProp, increments) {
+  function generateActorTrackSegment (
+      actor, fromProp, increments, incrementSize, fromPercent) {
 
     var serializedFrames = [];
-    var fromPercent = (fromProp.millisecond / actor.getLength()) * 100;
-
-    var nextProp = fromProp.nextProperty;
-    var toPercent;
-    if (nextProp) {
-      toPercent = (nextProp.millisecond / actor.getLength()) * 100;
-    } else {
-      toPercent = 100;
-    }
-
-    var delta = toPercent - fromPercent;
-    var incrementSize = delta / increments;
-
     var i, adjustedPercent, stepPrefix;
     for (i = 0; i < increments; i++) {
       adjustedPercent = fromPercent + (i * incrementSize);
@@ -415,43 +405,6 @@ var rekapiToCSS = function (context, _) {
 
     return serializedFrames;
   };
-
-
-  /**
-   * @param {Kapi.Actor} actor
-   * @param {string} track
-   * @param {number} granularity
-   * @return {string}
-   */
-  function generateActorTrackKeyframes (actor, track, granularity) {
-    var trackEnd = actor.getEnd(track);
-
-    if (!trackEnd) {
-      return '';
-    }
-
-    var segmentAccumulator = [];
-
-    _.each(actor._propertyTracks[track], function (prop) {
-      var nextProp = prop.nextProperty;
-
-      var segmentLength;
-      if (nextProp) {
-        segmentLength = nextProp.millisecond - prop.millisecond;
-      } else {
-        segmentLength = trackEnd - prop.millisecond;
-      }
-
-      // increments must be at least 1 to ensure that all segments are
-      // serialized.
-      var increments =
-          Math.ceil((segmentLength / trackEnd) * granularity) || 1;
-      var trackSegment = generateActorTrackSegment(actor, prop, increments);
-      segmentAccumulator = segmentAccumulator.concat(trackSegment);
-    });
-
-    return segmentAccumulator.join('\n');
-  }
 
 
   /**
@@ -499,7 +452,6 @@ var rekapiToCSS = function (context, _) {
       ,'getOptimizedEasingFormula': getOptimizedEasingFormula
       ,'generateActorKeyframes': generateActorKeyframes
       ,'generateActorTrackSegment': generateActorTrackSegment
-      ,'generateActorTrackKeyframes': generateActorTrackKeyframes
       ,'serializeActorStep': serializeActorStep
       ,'generateAnimationNameProperty': generateAnimationNameProperty
       ,'generateAnimationDurationProperty': generateAnimationDurationProperty
