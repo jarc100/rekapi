@@ -388,6 +388,41 @@ var rekapiToCSS = function (context, _) {
 
   /**
    * @param {Kapi.Actor} actor
+   * @param {Kapi.KeyframeProperty} fromProp
+   * @param {number} increments
+   * @return {Array.<string>}
+   */
+  function generateActorTrackSegment (actor, fromProp, increments) {
+
+    var serializedFrames = [];
+    var fromPercent = (fromProp.millisecond / actor.getLength()) * 100;
+
+    var nextProp = fromProp.nextProperty;
+    var toPercent;
+    if (nextProp) {
+      toPercent = (nextProp.millisecond / actor.getLength()) * 100;
+    } else {
+      toPercent = 100;
+    }
+
+    var delta = toPercent - fromPercent;
+    var incrementSize = delta / increments;
+
+    var i, adjustedPercent, stepPrefix;
+    for (i = 0; i < increments; i++) {
+      adjustedPercent = fromPercent + (i * incrementSize);
+      actor.updateState( (adjustedPercent / 100) * actor.getLength() );
+      stepPrefix = +adjustedPercent.toFixed(2) + '% ';
+      serializedFrames.push(
+          '  ' + stepPrefix + serializeActorStep(actor, fromProp.name));
+    }
+
+    return serializedFrames;
+  };
+
+
+  /**
+   * @param {Kapi.Actor} actor
    * @param {string} track
    * @param {number} granularity
    * @return {string}
@@ -421,41 +456,6 @@ var rekapiToCSS = function (context, _) {
 
     return segmentAccumulator.join('\n');
   }
-
-
-  /**
-   * @param {Kapi.Actor} actor
-   * @param {Kapi.KeyframeProperty} fromProp
-   * @param {number} increments
-   * @return {Array.<string>}
-   */
-  function generateActorTrackSegment (actor, fromProp, increments) {
-
-    var serializedFrames = [];
-    var fromPercent = (fromProp.millisecond / actor.getLength()) * 100;
-
-    var nextProp = fromProp.nextProperty;
-    var toPercent;
-    if (nextProp) {
-      toPercent = (nextProp.millisecond / actor.getLength()) * 100;
-    } else {
-      toPercent = 100;
-    }
-
-    var delta = toPercent - fromPercent;
-    var incrementSize = delta / increments;
-
-    var i, adjustedPercent, stepPrefix;
-    for (i = 0; i < increments; i++) {
-      adjustedPercent = fromPercent + (i * incrementSize);
-      actor.updateState( (adjustedPercent / 100) * actor.getLength() );
-      stepPrefix = +adjustedPercent.toFixed(2) + '% ';
-      serializedFrames.push(
-          '  ' + stepPrefix + serializeActorStep(actor, fromProp.name));
-    }
-
-    return serializedFrames;
-  };
 
 
   /**
