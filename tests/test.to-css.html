@@ -335,6 +335,37 @@
     });
 
 
+    test('Late-starting track generates duplicate keyframes at the beginning to simulate a wait',
+        function () {
+
+      var kapi = new Kapi();
+      var actor1 = setupTestActor(kapi);
+
+      actor1
+        .keyframe(0,    { 'x': 0           })
+        .keyframe(500,  { 'y': 0           })
+        .keyframe(1000, { 'x': 10, 'y': 10 });
+
+      var keyframeData =
+          Kapi._private.toCSS.generateActorKeyframes(actor1, 10, 'y');
+
+      equal(
+          keyframeData
+          ,['  0% {y:0;}'
+            ,'  10% {y:0;}'
+            ,'  20% {y:0;}'
+            ,'  30% {y:0;}'
+            ,'  40% {y:0;}'
+            ,'  50% {y:0;}'
+            ,'  60% {y:2;}'
+            ,'  70% {y:4;}'
+            ,'  80% {y:6;}'
+            ,'  90% {y:8;}'
+            ,'  100% {y:10;}'].join('\n')
+          ,'The first half of the animation was identical');
+    });
+
+
     test('Can control granularity of un-optimized keyframe data',
         function () {
 
